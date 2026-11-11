@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChurchManager – Phase 1 : conception et structuration</title>
+<style>
+:root{--navy:#0B2545;--navy2:#13315C;--gold:#B8913A;--paper:#FBFAF6;--ink:#1B2430;--line:#DDD8C8;--code:#0E1B2E}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.65 "Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper)}
+header{background:var(--navy);color:#fff;padding:44px 24px;border-bottom:4px solid var(--gold)}
+header h1{font:600 2rem/1.2 Georgia,"Times New Roman",serif;margin:0 0 8px;max-width:900px;margin-inline:auto}
+header p{margin:0 auto;max-width:900px;color:#C9D3E3}
+nav{background:var(--navy2);position:sticky;top:0;z-index:5;overflow-x:auto;white-space:nowrap}
+nav a{display:inline-block;color:#E7EDF7;padding:12px 16px;text-decoration:none;font-size:.9rem}
+nav a:hover,nav a:focus-visible{background:var(--gold);color:var(--navy);outline:none}
+main{max-width:900px;margin:0 auto;padding:8px 20px 60px}
+section{padding-top:36px}
+h2{font:600 1.5rem Georgia,serif;color:var(--navy);border-bottom:2px solid var(--gold);padding-bottom:6px}
+h3{color:var(--navy2);margin-top:24px}
+pre{background:var(--code);color:#E6EDF7;padding:16px;border-radius:8px;overflow-x:auto;font:13px/1.5 Consolas,Menlo,monospace}
+code{font-family:Consolas,Menlo,monospace;font-size:.9em;background:#EFEBDD;padding:1px 5px;border-radius:4px}
+pre code{background:none;padding:0}
+table{width:100%;border-collapse:collapse;font-size:.92rem;display:block;overflow-x:auto}
+th{background:var(--navy);color:#fff;text-align:left}
+th,td{padding:8px 10px;border:1px solid var(--line);vertical-align:top}
+.note{background:#FFF7E0;border-left:4px solid var(--gold);padding:12px 16px;border-radius:0 8px 8px 0}
+.sw{display:flex;gap:10px;flex-wrap:wrap}
+.sw div{flex:1 1 120px;border-radius:10px;padding:14px 10px;font-size:.85rem;border:1px solid var(--line)}
+.wire{display:grid;grid-template-columns:150px 1fr;border:2px solid var(--navy);border-radius:10px;overflow:hidden;min-height:230px}
+.wire .sb{background:var(--navy);color:#fff;padding:12px;font-size:.8rem;line-height:2}
+.wire .mn{padding:0}
+.wire .tb{background:#fff;border-bottom:3px solid var(--gold);padding:8px 12px;font-size:.8rem}
+.wire .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px}
+.wire .cards span{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;font-size:.75rem;text-align:center}
+.wire .gr{margin:0 12px 12px;border:1px dashed var(--navy2);border-radius:10px;padding:26px;text-align:center;font-size:.8rem;color:var(--navy2)}
+@media(max-width:640px){.wire{grid-template-columns:1fr}.wire .cards{grid-template-columns:1fr 1fr}}
+footer{background:var(--navy);color:#C9D3E3;padding:20px;text-align:center;font-size:.9rem}
+</style>
+</head>
+<body>
+<header>
+<h1>ChurchManager – Phase 1 : conception et structuration</h1>
+<p>Application Web de gestion d’église. Ce document couvre l’architecture, l’arborescence, la base de données, l’authentification, le design et la remontée des données vers Google Sheets. Aucun module n’est développé avant votre validation.</p>
+</header>
+<nav>
+<a href="#archi">1. Architecture</a><a href="#tree">2. Arborescence</a><a href="#db">3. Base de données</a><a href="#auth">4. Authentification</a><a href="#design">5. Design</a><a href="#sheets">6. Google Sheets</a><a href="#valid">7. Validation</a>
+</nav>
+<main>
+
+<section id="archi">
+<h2>1. Architecture technique</h2>
+<div class="note"><strong>Décision importante.</strong> Une page HTML avec JavaScript ne peut pas se connecter directement à MySQL : le navigateur exposerait les identifiants de la base. Il faut une couche serveur. Je retiens <strong>PHP 8 + PDO</strong> (hébergement courant et peu coûteux), sans framework lourd.</div>
+<table>
+<tr><th>Couche</th><th>Choix</th><th>Rôle</th></tr>
+<tr><td>Frontend</td><td>HTML5, CSS3, JavaScript, Bootstrap 5, Chart.js</td><td>Pages, formulaires, graphiques, calendrier. Appels <code>fetch()</code> vers l’API.</td></tr>
+<tr><td>Backend</td><td>PHP 8, architecture modulaire (contrôleur / service / dépôt)</td><td>Logique métier, sécurité, permissions, exports.</td></tr>
+<tr><td>Base de données</td><td>MySQL 8, InnoDB, utf8mb4</td><td>Tables normalisées, clés étrangères, index.</td></tr>
+<tr><td>Exports</td><td>Dompdf (PDF), PhpSpreadsheet (Excel)</td><td>Rapports imprimables.</td></tr>
+<tr><td>Synchronisation</td><td>Google Apps Script + file d’attente <code>sync_queue</code></td><td>Copie des données vers Google Sheets (section 6).</td></tr>
+</table>
+<h3>Principes</h3>
+<p>Une requête = un point d’entrée unique (<code>public/index.php</code>) qui charge le routeur, vérifie la session, le jeton CSRF et la permission requise, puis appelle le module. Chaque module est autonome (<code>modules/membres</code>, <code>modules/finances</code>…). Les textes sont stockés dans <code>lang/fr.php</code> pour ajouter <code>ht.php</code> et <code>en.php</code> plus tard.</p>
+</section>
+
+<section id="tree">
+<h2>2. Arborescence des fichiers</h2>
+<pre><code>churchmanager/
+├─ public/                    # seul dossier exposé au Web
+│  ├─ index.php               # point d'entrée + routeur
+│  ├─ login.php
+│  └─ assets/{css,js,img,vendor}/
+│     ├─ css/theme.css        # variables bleu marine / doré
+│     └─ js/{app.js,api.js,charts.js,calendar.js}
+├─ app/
+│  ├─ config/{config.php,database.php,permissions.php}
+│  ├─ core/{Database,Auth,Session,Csrf,Router,Validator,Audit,Response,SheetsSync}.php
+│  ├─ modules/
+│  │  ├─ dashboard/   ├─ membres/    ├─ visiteurs/  ├─ departements/
+│  │  ├─ finances/    ├─ evenements/ ├─ presences/  ├─ utilisateurs/
+│  │  └─ rapports/    (chaque dossier : Controller, Service, Repository, vues)
+│  └─ views/layout/{header,sidebar,topbar,footer}.php
+├─ lang/{fr.php}              # ht.php, en.php ajoutables
+├─ database/{schema.sql,seed.sql}
+├─ cron/{sync_sheets.php,backup.php}
+├─ sheets/apps_script.gs      # script à coller dans Google Sheets
+├─ storage/{uploads,backups,logs}/   # hors accès public
+├─ .htaccess
+└─ README.md                  # installation</code></pre>
+</section>
+
+<section id="db">
+<h2>3. Base de données MySQL</h2>
+<h3>Schéma relationnel</h3>
+<table>
+<tr><th>Table</th><th>Contenu</th><th>Relations</th></tr>
+<tr><td>roles, permissions, role_permissions</td><td>Rôles et droits configurables</td><td>role_permissions → roles, permissions</td></tr>
+<tr><td>users</td><td>Comptes de connexion</td><td>→ roles ; → membres (optionnel)</td></tr>
+<tr><td>membres</td><td>Fiche individuelle complète</td><td>→ departements (via membre_departement)</td></tr>
+<tr><td>departements</td><td>Nom, description, statut</td><td>responsable_id → membres</td></tr>
+<tr><td>membre_departement</td><td>Appartenance + fonction</td><td>→ membres, departements</td></tr>
+<tr><td>visiteurs</td><td>Visites et suivi</td><td>suivi_par → users ; converti_membre_id → membres</td></tr>
+<tr><td>categories_finance</td><td>Dîmes, offrandes, loyer…</td><td>type : revenu ou depense</td></tr>
+<tr><td>operations</td><td>Entrées et sorties d’argent</td><td>→ categories_finance, users, clotures</td></tr>
+<tr><td>clotures</td><td>Clôtures journalière, mensuelle, annuelle</td><td>→ users</td></tr>
+<tr><td>evenements</td><td>Cultes, réunions, baptêmes…</td><td>responsable_id → membres</td></tr>
+<tr><td>presences</td><td>Présence d’un membre ou d’un visiteur</td><td>→ evenements, membres ou visiteurs</td></tr>
+<tr><td>journal_audit</td><td>Traçabilité des opérations</td><td>→ users</td></tr>
+<tr><td>sync_queue</td><td>Lignes à envoyer vers Google Sheets</td><td>table_name + record_id</td></tr>
+</table>
+<h3>Script SQL de création (Phase 1)</h3>
+<pre><code>CREATE DATABASE churchmanager CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE churchmanager;
+
+CREATE TABLE roles(
+  id TINYINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  code VARCHAR(30) NOT NULL UNIQUE, libelle VARCHAR(60) NOT NULL
+) ENGINE=InnoDB;
+CREATE TABLE permissions(
+  id SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  code VARCHAR(60) NOT NULL UNIQUE, libelle VARCHAR(120) NOT NULL
+) ENGINE=InnoDB;
+CREATE TABLE role_permissions(
+  role_id TINYINT UNSIGNED NOT NULL, permission_id SMALLINT UNSIGNED NOT NULL,
+  PRIMARY KEY(role_id,permission_id),
+  FOREIGN KEY(role_id) REFERENCES roles(id) ON DELETE CASCADE,
+  FOREIGN KEY(permission_id) REFERENCES permissions(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE membres(
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  matricule VARCHAR(20) NOT NULL UNIQUE,
+  photo VARCHAR(255) NULL,
+  nom VARCHAR(80) NOT NULL, prenom VARCHAR(80) NOT NULL,
+  sexe ENUM('M','F') NOT NULL, date_naissance DATE NULL,
+  telephone VARCHAR(30) NULL, email VARCHAR(120) NULL, adresse VARCHAR(255) NULL,
+  date_integration DATE NULL, date_bapteme DATE NULL,
+  statut ENUM('actif','inactif','transfere','decede','archive') NOT NULL DEFAULT 'actif',
+  urgence_nom VARCHAR(120) NULL, urgence_telephone VARCHAR(30) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX(nom,prenom), INDEX(statut), INDEX(telephone)
+) ENGINE=InnoDB;
+
+CREATE TABLE users(
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role_id TINYINT UNSIGNED NOT NULL,
+  membre_id INT UNSIGNED NULL,
+  actif BOOLEAN NOT NULL DEFAULT TRUE,
+  tentatives TINYINT UNSIGNED NOT NULL DEFAULT 0, verrouille_jusqua DATETIME NULL,
+  derniere_connexion DATETIME NULL,
+  FOREIGN KEY(role_id) REFERENCES roles(id),
+  FOREIGN KEY(membre_id) REFERENCES membres(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE departements(
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  nom VARCHAR(100) NOT NULL UNIQUE, description TEXT NULL,
+  responsable_id INT UNSIGNED NULL, date_creation DATE NULL,
+  statut ENUM('actif','inactif') NOT NULL DEFAULT 'actif',
+  FOREIGN KEY(responsable_id) REFERENCES membres(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+CREATE TABLE membre_departement(
+  membre_id INT UNSIGNED NOT NULL, departement_id INT UNSIGNED NOT NULL,
+  fonction VARCHAR(80) NULL, date_adhesion DATE NULL,
+  PRIMARY KEY(membre_id,departement_id),
+  FOREIGN KEY(membre_id) REFERENCES membres(id) ON DELETE CASCADE,
+  FOREIGN KEY(departement_id) REFERENCES departements(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE visiteurs(
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  nom VARCHAR(80) NOT NULL, prenom VARCHAR(80) NOT NULL,
+  telephone VARCHAR(30) NULL, adresse VARCHAR(255) NULL,
+  date_visite DATE NOT NULL, nombre_visites SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+  observations TEXT NULL, suivi_par INT UNSIGNED NULL,
+  souhaite_devenir_membre BOOLEAN NOT NULL DEFAULT FALSE,
+  converti_membre_id INT UNSIGNED NULL,
+  FOREIGN KEY(suivi_par) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY(converti_membre_id) REFERENCES membres(id) ON DELETE SET NULL,
+  INDEX(date_visite), INDEX(nom,prenom)
+) ENGINE=InnoDB;
+
+CREATE TABLE categories_finance(
+  id SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  nom VARCHAR(80) NOT NULL, type ENUM('revenu','depense') NOT NULL,
+  UNIQUE(nom,type)
+) ENGINE=InnoDB;
+CREATE TABLE clotures(
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  periode ENUM('jour','mois','annee') NOT NULL,
+  date_debut DATE NOT NULL, date_fin DATE NOT NULL,
+  total_revenus DECIMAL(14,2) NOT NULL, total_depenses DECIMAL(14,2) NOT NULL,
+  cloture_par INT UNSIGNED NOT NULL, cloture_le DATETIME NOT NULL,
+  UNIQUE(periode,date_debut),
+  FOREIGN KEY(cloture_par) REFERENCES users(id)
+) ENGINE=InnoDB;
+CREATE TABLE operations(
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  reference VARCHAR(25) NOT NULL UNIQUE,
+  date_operation DATE NOT NULL, categorie_id SMALLINT UNSIGNED NOT NULL,
+  description VARCHAR(255) NULL,
+  montant DECIMAL(14,2) NOT NULL CHECK (montant &gt; 0),
+  mode_paiement ENUM('especes','cheque','virement','mobile') NOT NULL,
+  saisi_par INT UNSIGNED NOT NULL, cloture_id INT UNSIGNED NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(categorie_id) REFERENCES categories_finance(id),
+  FOREIGN KEY(saisi_par) REFERENCES users(id),
+  FOREIGN KEY(cloture_id) REFERENCES clotures(id),
+  INDEX(date_operation), INDEX(categorie_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE evenements(
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  titre VARCHAR(150) NOT NULL,
+  type ENUM('culte','priere','conference','seminaire','retraite','bapteme','mariage','autre') NOT NULL,
+  description TEXT NULL, date_evenement DATE NOT NULL, heure TIME NULL,
+  lieu VARCHAR(150) NULL, responsable_id INT UNSIGNED NULL,
+  statut ENUM('planifie','en_cours','termine','annule') NOT NULL DEFAULT 'planifie',
+  FOREIGN KEY(responsable_id) REFERENCES membres(id) ON DELETE SET NULL,
+  INDEX(date_evenement)
+) ENGINE=InnoDB;
+CREATE TABLE presences(
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  evenement_id INT UNSIGNED NOT NULL,
+  membre_id INT UNSIGNED NULL, visiteur_id INT UNSIGNED NULL,
+  present BOOLEAN NOT NULL DEFAULT TRUE,
+  FOREIGN KEY(evenement_id) REFERENCES evenements(id) ON DELETE CASCADE,
+  FOREIGN KEY(membre_id) REFERENCES membres(id) ON DELETE CASCADE,
+  FOREIGN KEY(visiteur_id) REFERENCES visiteurs(id) ON DELETE CASCADE,
+  UNIQUE(evenement_id,membre_id), UNIQUE(evenement_id,visiteur_id),
+  CHECK ((membre_id IS NULL) &lt;&gt; (visiteur_id IS NULL))
+) ENGINE=InnoDB;
+
+CREATE TABLE journal_audit(
+  id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  user_id INT UNSIGNED NULL, action VARCHAR(40) NOT NULL,
+  table_name VARCHAR(40) NULL, record_id INT UNSIGNED NULL,
+  details JSON NULL, ip VARCHAR(45) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX(created_at), INDEX(table_name,record_id)
+) ENGINE=InnoDB;
+CREATE TABLE sync_queue(
+  id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  table_name VARCHAR(40) NOT NULL, record_id INT UNSIGNED NOT NULL,
+  action ENUM('upsert','delete') NOT NULL DEFAULT 'upsert',
+  statut ENUM('attente','envoye','erreur') NOT NULL DEFAULT 'attente',
+  tentatives TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX(statut)
+) ENGINE=InnoDB;</code></pre>
+<p>Une opération appartenant à une clôture est verrouillée : le backend refuse sa modification.</p>
+</section>
+
+<section id="auth">
+<h2>4. Authentification et permissions</h2>
+<table>
+<tr><th>Mesure</th><th>Mise en œuvre</th></tr>
+<tr><td>Mots de passe</td><td><code>password_hash()</code> (Argon2id ou bcrypt), <code>password_verify()</code>, minimum 10 caractères.</td></tr>
+<tr><td>Session</td><td>Cookies <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite=Strict</code> ; <code>session_regenerate_id()</code> à la connexion ; expiration après 30 min d’inactivité.</td></tr>
+<tr><td>Force brute</td><td>Verrouillage 15 min après 5 échecs (<code>tentatives</code>, <code>verrouille_jusqua</code>).</td></tr>
+<tr><td>CSRF</td><td>Jeton unique par session dans chaque formulaire et en-tête <code>X-CSRF-Token</code> des appels <code>fetch()</code>.</td></tr>
+<tr><td>XSS</td><td>Échappement <code>htmlspecialchars()</code> en sortie, <code>textContent</code> côté JavaScript, en-tête CSP.</td></tr>
+<tr><td>SQL</td><td>PDO, requêtes préparées uniquement, <code>ATTR_EMULATE_PREPARES=false</code>.</td></tr>
+<tr><td>Permissions</td><td>Chaque route déclare un code (<code>finances.creer</code>, <code>membres.modifier</code>…). Les droits sont stockés en base et modifiables par le super administrateur.</td></tr>
+<tr><td>Traçabilité</td><td>Connexions, créations, modifications, suppressions et clôtures écrites dans <code>journal_audit</code>.</td></tr>
+</table>
+<h3>Matrice initiale des rôles</h3>
+<table>
+<tr><th>Module</th><th>Super admin</th><th>Pasteur</th><th>Secrétaire</th><th>Trésorier</th><th>Resp. département</th></tr>
+<tr><td>Tableau de bord</td><td>Complet</td><td>Complet</td><td>Sans finances</td><td>Finances</td><td>Son département</td></tr>
+<tr><td>Membres</td><td>CRUD</td><td>Lecture</td><td>CRUD</td><td>–</td><td>Son département</td></tr>
+<tr><td>Visiteurs</td><td>CRUD</td><td>Lecture</td><td>CRUD</td><td>–</td><td>–</td></tr>
+<tr><td>Départements</td><td>CRUD</td><td>Lecture</td><td>Lecture</td><td>–</td><td>Le sien</td></tr>
+<tr><td>Finances</td><td>CRUD + clôture</td><td>Lecture</td><td>–</td><td>CRUD + clôture</td><td>–</td></tr>
+<tr><td>Événements, présences</td><td>CRUD</td><td>Lecture</td><td>CRUD</td><td>–</td><td>Les siens</td></tr>
+<tr><td>Utilisateurs, sauvegardes</td><td>CRUD</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>Rapports</td><td>Tous</td><td>Tous</td><td>Non financiers</td><td>Financiers</td><td>Son département</td></tr>
+</table>
+</section>
+
+<section id="design">
+<h2>5. Conception visuelle</h2>
+<div class="sw">
+<div style="background:#0B2545;color:#fff">Bleu marine<br>#0B2545</div>
+<div style="background:#13315C;color:#fff">Bleu profond<br>#13315C</div>
+<div style="background:#B8913A;color:#0B2545">Doré<br>#B8913A</div>
+<div style="background:#FBFAF6">Blanc cassé<br>#FBFAF6</div>
+<div style="background:#fff">Blanc<br>#FFFFFF</div>
+</div>
+<p>Titres en serif (Georgia), interface en sans-serif système (Segoe UI, Roboto). Le doré est réservé aux éléments actifs : filet de la topbar, élément de menu courant, bouton principal, valeurs clés. Cartes statistiques aux coins arrondis, tableaux à en-tête bleu marine, notifications vertes (succès) et rouges (erreur), fenêtres de confirmation pour toute suppression.</p>
+<h3>Structure des écrans</h3>
+<div class="wire" role="img" aria-label="Schéma de l'écran principal">
+<div class="sb">Tableau de bord<br>Membres<br>Visiteurs<br>Départements<br>Finances<br>Événements<br>Présences<br>Rapports<br>Utilisateurs</div>
+<div class="mn">
+<div class="tb">Recherche · Notifications · Profil</div>
+<div class="cards"><span>Membres</span><span>Offrandes</span><span>Dépenses</span><span>Solde</span></div>
+<div class="gr">Graphiques : membres, revenus et dépenses · Prochains événements</div>
+</div>
+</div>
+<p>Sur mobile, la sidebar devient un menu escamotable, les tableaux défilent horizontalement et les cartes passent sur deux colonnes puis une.</p>
+</section>
+
+<section id="sheets">
+<h2>6. Remontée des données vers Google Sheets</h2>
+<p>Principe : à chaque création, modification ou suppression, le backend ajoute une ligne dans <code>sync_queue</code>. Une tâche planifiée (cron) envoie ces lignes à un script Google Apps Script, qui les écrit dans le classeur : un onglet par table. MySQL reste la source de vérité ; Google Sheets sert de copie de consultation.</p>
+<h3>Étape 1 : préparer le classeur</h3>
+<ol>
+<li>Créez un Google Sheets nommé « ChurchManager – Données ».</li>
+<li>Menu <strong>Extensions → Apps Script</strong>.</li>
+<li>Supprimez le code existant et collez le script ci-dessous (fichier <code>sheets/apps_script.gs</code>).</li>
+<li>Remplacez <code>CHANGER_CE_SECRET</code> par une longue chaîne aléatoire (32 caractères ou plus).</li>
+</ol>
+<pre><code>const SECRET = 'CHANGER_CE_SECRET';
+
+function doPost(e) {
+  const d = JSON.parse(e.postData.contents);
+  if (d.token !== SECRET) return out({ok:false, error:'refuse'});
+  const ss = SpreadsheetApp.getActive();
+  const sh = ss.getSheetByName(d.table) || ss.insertSheet(d.table);
+  if (sh.getLastRow() === 0 &amp;&amp; d.row) sh.appendRow(Object.keys(d.row));
+  const n = sh.getLastRow() - 1;
+  const ids = n &gt; 0 ? sh.getRange(2, 1, n, 1).getValues().flat().map(String) : [];
+  const i = ids.indexOf(String(d.id));
+  if (d.action === 'delete') {
+    if (i &gt;= 0) sh.deleteRow(i + 2);
+  } else {
+    const vals = Object.values(d.row);
+    if (i &gt;= 0) sh.getRange(i + 2, 1, 1, vals.length).setValues([vals]);
+    else sh.appendRow(vals);
+  }
+  return out({ok:true});
+}
+function out(o) {
+  return ContentService.createTextOutput(JSON.stringify(o))
+    .setMimeType(ContentService.MimeType.JSON);
+}</code></pre>
+<h3>Étape 2 : publier le script</h3>
+<ol start="5">
+<li><strong>Déployer → Nouveau déploiement → Application Web</strong>.</li>
+<li>Exécuter en tant que : <strong>Moi</strong>. Qui a accès : <strong>Tout le monde</strong> (l’accès est protégé par le secret).</li>
+<li>Autorisez les permissions demandées, puis copiez l’<strong>URL</strong> terminant par <code>/exec</code>.</li>
+</ol>
+<h3>Étape 3 : configurer l’application</h3>
+<ol start="8">
+<li>Dans <code>app/config/config.php</code>, renseignez <code>SHEETS_URL</code> (URL copiée) et <code>SHEETS_SECRET</code> (même secret). Ces valeurs ne doivent jamais apparaître dans le JavaScript du navigateur.</li>
+<li>La classe <code>core/SheetsSync.php</code> lit les lignes <code>statut='attente'</code>, charge l’enregistrement, puis envoie en cURL : <code>{"token":…,"table":"membres","id":12,"action":"upsert","row":{…}}</code>. En cas de succès, la ligne passe à <code>envoye</code> ; sinon <code>erreur</code> avec nouvelle tentative (3 maximum).</li>
+<li>Planifiez la tâche toutes les 5 minutes : <code>*/5 * * * * php /chemin/churchmanager/cron/sync_sheets.php</code> (cron de l’hébergeur).</li>
+</ol>
+<h3>Étape 4 : vérifier</h3>
+<ol start="11">
+<li>Ajoutez un membre test dans l’application.</li>
+<li>Lancez <code>sync_sheets.php</code> à la main, puis ouvrez le classeur : l’onglet <code>membres</code> doit contenir l’en-tête et la ligne.</li>
+<li>Modifiez le membre : la même ligne est mise à jour, sans doublon.</li>
+</ol>
+<div class="note"><strong>Confidentialité.</strong> Les fiches de membres sont des données personnelles. Gardez le classeur privé, partagez-le uniquement avec les personnes autorisées, et n’envoyez pas les colonnes sensibles inutiles (photo, contact d’urgence). Les opérations financières restent visibles seulement du trésorier et du pasteur.</div>
+</section>
+
+<section id="valid">
+<h2>7. Validation demandée</h2>
+<p>Points à confirmer avant la Phase 2 :</p>
+<ol>
+<li>Accord sur l’ajout de PHP 8 comme couche serveur (obligatoire pour MySQL).</li>
+<li>Devise utilisée (gourde haïtienne, dollar américain ou les deux).</li>
+<li>Hébergement prévu (local avec XAMPP ou serveur en ligne), car cela fixe la méthode de planification du cron.</li>
+<li>Colonnes à envoyer vers Google Sheets (toutes les tables ou seulement membres, visiteurs et finances).</li>
+</ol>
+<p>Dès votre validation, je développe la Phase 2 en commençant par le socle commun (configuration, connexion, mise en page) puis le tableau de bord.</p>
+</section>
+
+</main>
+<footer>ChurchManager · Phase 1 · en attente de validation</footer>
+</body>
+</html>
