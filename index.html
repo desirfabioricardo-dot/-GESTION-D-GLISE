@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestion d’église</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0f2347;--navy2:#1a3566;--gold:#c8a24a;--bg:#f5f6fa;--card:#fff;--txt:#1b2438;--mut:#6b7590;--ok:#1f7a4d;--err:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh}
+aside{width:230px;background:var(--navy);color:#fff;padding:20px 12px;flex-shrink:0}
+aside h1{font:700 20px 'Source Serif 4',Georgia,serif;color:var(--gold);margin:0 8px 24px}
+aside button{display:block;width:100%;text-align:left;background:none;border:0;color:#cfd6e8;padding:11px 12px;border-radius:8px;font:500 14px inherit;cursor:pointer;margin-bottom:4px}
+aside button:hover{background:var(--navy2)}
+aside button.on{background:var(--navy2);color:#fff;box-shadow:inset 3px 0 var(--gold)}
+main{flex:1;padding:28px;min-width:0}
+h2{font:700 26px 'Source Serif 4',Georgia,serif;color:var(--navy);margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px}
+.stat{background:var(--card);border-radius:14px;padding:16px;border-top:3px solid var(--gold)}
+.stat b{display:block;font:700 26px 'Source Serif 4',Georgia,serif;color:var(--navy)}
+.stat span{color:var(--mut);font-size:13px}
+.card{background:var(--card);border-radius:14px;padding:18px;margin-bottom:18px;overflow-x:auto}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end}
+label{font-size:12px;color:var(--mut);display:flex;flex-direction:column;gap:4px}
+input,select,textarea{padding:9px;border:1px solid #cfd5e3;border-radius:8px;font:inherit;width:100%}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.btn{background:var(--navy);color:#fff;border:0;border-radius:8px;padding:10px 16px;font:600 14px inherit;cursor:pointer}
+.btn.gold{background:var(--gold);color:var(--navy)}
+.btn.del{background:none;color:var(--err);padding:4px 8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--mut);font-weight:500;border-bottom:2px solid var(--gold);padding:8px}
+td{padding:8px;border-bottom:1px solid #e7eaf2}
+.in{color:var(--ok)}.out{color:var(--err)}
+#msg{margin-top:12px;font-size:14px;min-height:20px}
+ol{padding-left:18px;line-height:1.7;font-size:14px}
+@media(max-width:700px){body{flex-direction:column}aside{width:100%;display:flex;gap:4px;overflow-x:auto;padding:10px}aside h1{display:none}aside button{white-space:nowrap;width:auto}main{padding:16px}}
+@media(prefers-reduced-motion:no-preference){.btn{transition:filter .15s}.btn:hover{filter:brightness(1.1)}}
+</style>
+</head>
+<body>
+<aside>
+  <h1>Gestion d’église</h1>
+  <button data-p="dash" class="on">Tableau de bord</button>
+  <button data-p="mem">Membres</button>
+  <button data-p="fin">Finances</button>
+  <button data-p="exp">Export Google Sheets</button>
+</aside>
+<main>
+<section id="dash">
+  <h2>Tableau de bord</h2>
+  <div class="grid" id="stats"></div>
+  <div class="card"><h3>Dernières opérations</h3><table id="lastTx"></table></div>
+</section>
+
+<section id="mem" hidden>
+  <h2>Membres</h2>
+  <div class="card"><form id="fMem">
+    <label>Nom<input name="nom" required></label>
+    <label>Prénom<input name="prenom" required></label>
+    <label>Sexe<select name="sexe"><option>F</option><option>M</option></select></label>
+    <label>Téléphone<input name="tel" type="tel"></label>
+    <label>Département<input name="dept" placeholder="Chorale, Jeunesse…"></label>
+    <label>Statut<select name="statut"><option>Actif</option><option>Visiteur</option><option>Inactif</option></select></label>
+    <button class="btn" type="submit">Ajouter le membre</button>
+  </form></div>
+  <div class="card"><table id="tMem"></table></div>
+</section>
+
+<section id="fin" hidden>
+  <h2>Finances</h2>
+  <div class="card"><form id="fFin">
+    <label>Date<input name="date" type="date" required></label>
+    <label>Type<select name="type"><option value="Entrée">Entrée</option><option value="Dépense">Dépense</option></select></label>
+    <label>Catégorie<select name="cat"><option>Dîme</option><option>Offrande</option><option>Don spécial</option><option>Électricité</option><option>Eau</option><option>Loyer</option><option>Entretien</option><option>Autre</option></select></label>
+    <label>Montant (HTG)<input name="montant" type="number" min="0" step="0.01" required></label>
+    <label>Description<input name="desc"></label>
+    <button class="btn" type="submit">Enregistrer</button>
+  </form></div>
+  <div class="card"><table id="tFin"></table></div>
+</section>
+
+<section id="exp" hidden>
+  <h2>Export vers Google Sheets</h2>
+  <div class="card">
+    <form id="fExp">
+      <label>URL de l’application Web (Apps Script)<input id="url" type="url" placeholder="https://script.google.com/macros/s/…/exec" required></label>
+      <label>Clé secrète<input id="key" type="password" required></label>
+      <button class="btn gold" type="submit">Envoyer vers Google Sheets</button>
+    </form>
+    <div id="msg" role="status"></div>
+  </div>
+  <div class="card">
+    <h3>Ce qui sera envoyé</h3>
+    <p id="resume"></p>
+    <p>Chaque envoi remplace le contenu des onglets <b>Membres</b> et <b>Finances</b> par les données actuelles de l’application.</p>
+  </div>
+</section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const load=k=>{try{return JSON.parse(localStorage.getItem(k))||[]}catch(e){return[]}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let members=load('eg_members'), tx=load('eg_tx');
+const fmt=n=>Number(n).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+document.querySelectorAll('aside button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('aside button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('main section').forEach(s=>s.hidden=s.id!==b.dataset.p);
+  render();
+});
+
+function render(){
+  const inc=tx.filter(t=>t.type==='Entrée').reduce((a,t)=>a+t.montant,0);
+  const exp=tx.filter(t=>t.type==='Dépense').reduce((a,t)=>a+t.montant,0);
+  const tithes=tx.filter(t=>t.cat==='Dîme').reduce((a,t)=>a+t.montant,0);
+  const depts=new Set(members.map(m=>m.dept).filter(Boolean)).size;
+  $('#stats').innerHTML=[
+    [members.filter(m=>m.statut!=='Visiteur').length,'Membres'],
+    [members.filter(m=>m.statut==='Visiteur').length,'Visiteurs'],
+    [depts,'Départements'],
+    [fmt(tithes),'Dîmes (HTG)'],
+    [fmt(exp),'Dépenses (HTG)'],
+    [fmt(inc-exp),'Solde (HTG)']
+  ].map(([v,l])=>`<div class="stat"><b>${esc(v)}</b><span>${l}</span></div>`).join('');
+  $('#lastTx').innerHTML='<tr><th>Date</th><th>Catégorie</th><th>Montant</th></tr>'+
+    (tx.slice(-5).reverse().map(t=>`<tr><td>${esc(t.date)}</td><td>${esc(t.cat)}</td><td class="${t.type==='Entrée'?'in':'out'}">${fmt(t.montant)}</td></tr>`).join('')||'<tr><td colspan="3">Aucune opération. Ajoutez-en une dans Finances.</td></tr>');
+  $('#tMem').innerHTML='<tr><th>Réf.</th><th>Nom</th><th>Prénom</th><th>Sexe</th><th>Téléphone</th><th>Département</th><th>Statut</th><th></th></tr>'+
+    (members.map((m,i)=>`<tr><td>${esc(m.id)}</td><td>${esc(m.nom)}</td><td>${esc(m.prenom)}</td><td>${esc(m.sexe)}</td><td>${esc(m.tel)}</td><td>${esc(m.dept)}</td><td>${esc(m.statut)}</td><td><button class="btn del" data-m="${i}">Supprimer</button></td></tr>`).join('')||'<tr><td colspan="8">Aucun membre. Remplissez le formulaire ci-dessus.</td></tr>');
+  $('#tFin').innerHTML='<tr><th>Réf.</th><th>Date</th><th>Type</th><th>Catégorie</th><th>Description</th><th>Montant</th><th></th></tr>'+
+    (tx.map((t,i)=>`<tr><td>${esc(t.id)}</td><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(t.cat)}</td><td>${esc(t.desc)}</td><td class="${t.type==='Entrée'?'in':'out'}">${fmt(t.montant)}</td><td><button class="btn del" data-t="${i}">Supprimer</button></td></tr>`).join('')||'<tr><td colspan="7">Aucune opération enregistrée.</td></tr>');
+  $('#resume').textContent=`${members.length} membre(s) et ${tx.length} opération(s) financière(s).`;
+}
+
+$('#fMem').onsubmit=e=>{e.preventDefault();
+  const d=Object.fromEntries(new FormData(e.target));
+  d.id='M'+String(Date.now()).slice(-6);
+  members.push(d);save('eg_members',members);e.target.reset();render();};
+$('#fFin').onsubmit=e=>{e.preventDefault();
+  const d=Object.fromEntries(new FormData(e.target));
+  d.montant=parseFloat(d.montant);d.id='T'+String(Date.now()).slice(-6);
+  tx.push(d);save('eg_tx',tx);e.target.reset();render();};
+document.addEventListener('click',e=>{
+  const m=e.target.dataset.m,t=e.target.dataset.t;
+  if(m!==undefined&&confirm('Supprimer ce membre ?')){members.splice(+m,1);save('eg_members',members);render();}
+  if(t!==undefined&&confirm('Supprimer cette opération ?')){tx.splice(+t,1);save('eg_tx',tx);render();}
+});
+
+// ---- Export Google Sheets ----
+try{$('#url').value=localStorage.getItem('eg_url')||''}catch(e){}
+$('#fExp').onsubmit=async e=>{e.preventDefault();
+  const msg=$('#msg');msg.style.color='';msg.textContent='Envoi en cours…';
+  const url=$('#url').value.trim();
+  try{localStorage.setItem('eg_url',url)}catch(e){}
+  const payload={
+    key:$('#key').value,
+    membres:[['Réf.','Nom','Prénom','Sexe','Téléphone','Département','Statut'],
+      ...members.map(m=>[m.id,m.nom,m.prenom,m.sexe,m.tel,m.dept,m.statut])],
+    finances:[['Réf.','Date','Type','Catégorie','Description','Montant (HTG)'],
+      ...tx.map(t=>[t.id,t.date,t.type,t.cat,t.desc,t.montant])]
+  };
+  try{
+    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+    const j=await r.json();
+    if(j.ok){msg.style.color='var(--ok)';msg.textContent=`Export réussi : ${j.membres} membre(s), ${j.finances} opération(s).`;}
+    else{msg.style.color='var(--err)';msg.textContent='Refusé par le script : '+(j.error||'erreur inconnue')+'. Vérifiez la clé secrète.';}
+  }catch(err){
+    msg.style.color='var(--err)';
+    msg.textContent='Envoi impossible. Vérifiez que l’URL se termine par /exec, que le déploiement est ouvert à « Tout le monde » et que vous êtes connecté à Internet.';
+  }
+};
+render();
+</script>
+</body>
+</html>
