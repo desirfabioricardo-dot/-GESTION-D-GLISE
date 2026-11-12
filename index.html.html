@@ -3,374 +3,273 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ChurchManager – Phase 1 : conception et structuration</title>
+<title>Institution Chrétienne Emmanuel Désir — SGSM</title>
 <style>
-:root{--navy:#0B2545;--navy2:#13315C;--gold:#B8913A;--paper:#FBFAF6;--ink:#1B2430;--line:#DDD8C8;--code:#0E1B2E}
+:root{--bg:#f6f8f7;--fg:#13272c;--mut:#4d6469;--card:#fff;--line:#cfdcd9;--pri:#0f5560;--acc:#c98a12;--code:#eaf0ef}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1b1e;--fg:#e4eeec;--mut:#9bb2b5;--card:#152a2e;--line:#2a444a;--pri:#5cc1cf;--acc:#e8b34a;--code:#0a1517}}
 *{box-sizing:border-box}
-body{margin:0;font:16px/1.65 "Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper)}
-header{background:var(--navy);color:#fff;padding:44px 24px;border-bottom:4px solid var(--gold)}
-header h1{font:600 2rem/1.2 Georgia,"Times New Roman",serif;margin:0 0 8px;max-width:900px;margin-inline:auto}
-header p{margin:0 auto;max-width:900px;color:#C9D3E3}
-nav{background:var(--navy2);position:sticky;top:0;z-index:5;overflow-x:auto;white-space:nowrap}
-nav a{display:inline-block;color:#E7EDF7;padding:12px 16px;text-decoration:none;font-size:.9rem}
-nav a:hover,nav a:focus-visible{background:var(--gold);color:var(--navy);outline:none}
-main{max-width:900px;margin:0 auto;padding:8px 20px 60px}
-section{padding-top:36px}
-h2{font:600 1.5rem Georgia,serif;color:var(--navy);border-bottom:2px solid var(--gold);padding-bottom:6px}
-h3{color:var(--navy2);margin-top:24px}
-pre{background:var(--code);color:#E6EDF7;padding:16px;border-radius:8px;overflow-x:auto;font:13px/1.5 Consolas,Menlo,monospace}
-code{font-family:Consolas,Menlo,monospace;font-size:.9em;background:#EFEBDD;padding:1px 5px;border-radius:4px}
-pre code{background:none;padding:0}
-table{width:100%;border-collapse:collapse;font-size:.92rem;display:block;overflow-x:auto}
-th{background:var(--navy);color:#fff;text-align:left}
-th,td{padding:8px 10px;border:1px solid var(--line);vertical-align:top}
-.note{background:#FFF7E0;border-left:4px solid var(--gold);padding:12px 16px;border-radius:0 8px 8px 0}
-.sw{display:flex;gap:10px;flex-wrap:wrap}
-.sw div{flex:1 1 120px;border-radius:10px;padding:14px 10px;font-size:.85rem;border:1px solid var(--line)}
-.wire{display:grid;grid-template-columns:150px 1fr;border:2px solid var(--navy);border-radius:10px;overflow:hidden;min-height:230px}
-.wire .sb{background:var(--navy);color:#fff;padding:12px;font-size:.8rem;line-height:2}
-.wire .mn{padding:0}
-.wire .tb{background:#fff;border-bottom:3px solid var(--gold);padding:8px 12px;font-size:.8rem}
-.wire .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px}
-.wire .cards span{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;font-size:.75rem;text-align:center}
-.wire .gr{margin:0 12px 12px;border:1px dashed var(--navy2);border-radius:10px;padding:26px;text-align:center;font-size:.8rem;color:var(--navy2)}
-@media(max-width:640px){.wire{grid-template-columns:1fr}.wire .cards{grid-template-columns:1fr 1fr}}
-footer{background:var(--navy);color:#C9D3E3;padding:20px;text-align:center;font-size:.9rem}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--pri);color:#fff;padding:2.5rem 1.25rem}
+header div,main{max-width:900px;margin:0 auto}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.25}
+h1{margin:0 0 .4rem;font-size:2rem}
+header p{margin:0;opacity:.9;max-width:60ch}
+main{padding:1rem 1.25rem 4rem}
+nav{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.2rem 0}
+nav a{padding:.3rem .7rem;border:1px solid var(--line);border-radius:6px;color:var(--pri);text-decoration:none;font-size:.9rem;background:var(--card)}
+h2{margin-top:2.6rem;padding-top:.6rem;border-top:3px solid var(--acc);font-size:1.5rem}
+h3{margin:1.6rem 0 .4rem;font-size:1.1rem;color:var(--pri)}
+p,li{max-width:75ch}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{padding:.5rem .7rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code)}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:1rem;overflow-x:auto;font-size:.82rem;line-height:1.5}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.88em}
+.note{border-left:4px solid var(--acc);background:var(--card);padding:.7rem 1rem;border-radius:0 8px 8px 0;margin:1rem 0}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 </style>
 </head>
 <body>
-<header>
-<h1>ChurchManager – Phase 1 : conception et structuration</h1>
-<p>Application Web de gestion d’église. Ce document couvre l’architecture, l’arborescence, la base de données, l’authentification, le design et la remontée des données vers Google Sheets. Aucun module n’est développé avant votre validation.</p>
-</header>
-<nav>
-<a href="#archi">1. Architecture</a><a href="#tree">2. Arborescence</a><a href="#db">3. Base de données</a><a href="#auth">4. Authentification</a><a href="#design">5. Design</a><a href="#sheets">6. Google Sheets</a><a href="#valid">7. Validation</a>
-</nav>
+<header><div>
+<h1>SGSM — Système de Gestion Scolaire Multiplateforme</h1>
+<p>Phase 1 : analyse, architecture, base de données, plan de développement. Annexe : démarche précise pour remonter les données vers Google Sheets.</p>
+</div></header>
 <main>
+<nav aria-label="Sommaire">
+<a href="#analyse">Analyse</a><a href="#archi">Architecture</a><a href="#bdd">Base de données</a><a href="#matricule">Matricule</a><a href="#roles">Rôles</a><a href="#plan">Plan</a><a href="#sheets">Export Google Sheets</a><a href="#questions">Questions</a>
+</nav>
 
-<section id="archi">
-<h2>1. Architecture technique</h2>
-<div class="note"><strong>Décision importante.</strong> Une page HTML avec JavaScript ne peut pas se connecter directement à MySQL : le navigateur exposerait les identifiants de la base. Il faut une couche serveur. Je retiens <strong>PHP 8 + PDO</strong> (hébergement courant et peu coûteux), sans framework lourd.</div>
-<table>
-<tr><th>Couche</th><th>Choix</th><th>Rôle</th></tr>
-<tr><td>Frontend</td><td>HTML5, CSS3, JavaScript, Bootstrap 5, Chart.js</td><td>Pages, formulaires, graphiques, calendrier. Appels <code>fetch()</code> vers l’API.</td></tr>
-<tr><td>Backend</td><td>PHP 8, architecture modulaire (contrôleur / service / dépôt)</td><td>Logique métier, sécurité, permissions, exports.</td></tr>
-<tr><td>Base de données</td><td>MySQL 8, InnoDB, utf8mb4</td><td>Tables normalisées, clés étrangères, index.</td></tr>
-<tr><td>Exports</td><td>Dompdf (PDF), PhpSpreadsheet (Excel)</td><td>Rapports imprimables.</td></tr>
-<tr><td>Synchronisation</td><td>Google Apps Script + file d’attente <code>sync_queue</code></td><td>Copie des données vers Google Sheets (section 6).</td></tr>
-</table>
-<h3>Principes</h3>
-<p>Une requête = un point d’entrée unique (<code>public/index.php</code>) qui charge le routeur, vérifie la session, le jeton CSRF et la permission requise, puis appelle le module. Chaque module est autonome (<code>modules/membres</code>, <code>modules/finances</code>…). Les textes sont stockés dans <code>lang/fr.php</code> pour ajouter <code>ht.php</code> et <code>en.php</code> plus tard.</p>
-</section>
+<h2 id="analyse">1. Analyse des contraintes</h2>
+<ul>
+<li><b>Une seule base centrale</b> : tous les appareils (Windows, macOS, Linux, Android, iOS, navigateur) parlent à la même API. Pas de logique métier dans les clients.</li>
+<li><b>Fiabilité du matricule</b> : plusieurs secrétaires peuvent inscrire en même temps. La numérotation doit donc être faite par la base, dans une transaction.</li>
+<li><b>Connexion internet irrégulière</b> (contexte probable en Haïti) : le mode hors ligne limité est une vraie exigence, pas un bonus. Il est prévu pour la saisie des présences et des notes uniquement.</li>
+<li><b>Deux monnaies</b> : chaque paiement garde sa devise d’origine, son taux appliqué et sa contre-valeur. Un taux modifié plus tard ne change jamais un paiement passé.</li>
+<li><b>Données d’enfants</b> : accès par rôle, journal d’activité, champs médicaux chiffrés, aucune donnée publique.</li>
+</ul>
 
-<section id="tree">
-<h2>2. Arborescence des fichiers</h2>
-<pre><code>churchmanager/
-├─ public/                    # seul dossier exposé au Web
-│  ├─ index.php               # point d'entrée + routeur
-│  ├─ login.php
-│  └─ assets/{css,js,img,vendor}/
-│     ├─ css/theme.css        # variables bleu marine / doré
-│     └─ js/{app.js,api.js,charts.js,calendar.js}
-├─ app/
-│  ├─ config/{config.php,database.php,permissions.php}
-│  ├─ core/{Database,Auth,Session,Csrf,Router,Validator,Audit,Response,SheetsSync}.php
-│  ├─ modules/
-│  │  ├─ dashboard/   ├─ membres/    ├─ visiteurs/  ├─ departements/
-│  │  ├─ finances/    ├─ evenements/ ├─ presences/  ├─ utilisateurs/
-│  │  └─ rapports/    (chaque dossier : Controller, Service, Repository, vues)
-│  └─ views/layout/{header,sidebar,topbar,footer}.php
-├─ lang/{fr.php}              # ht.php, en.php ajoutables
-├─ database/{schema.sql,seed.sql}
-├─ cron/{sync_sheets.php,backup.php}
-├─ sheets/apps_script.gs      # script à coller dans Google Sheets
-├─ storage/{uploads,backups,logs}/   # hors accès public
-├─ .htaccess
-└─ README.md                  # installation</code></pre>
-</section>
+<h2 id="archi">2. Architecture proposée</h2>
+<div class="tw"><table>
+<tr><th>Couche</th><th>Choix</th><th>Justification</th></tr>
+<tr><td>Frontend unique</td><td>React + TypeScript (Vite), composants shadcn/ui, Recharts</td><td>Une seule base de code pour le web, le bureau et le mobile.</td></tr>
+<tr><td>Bureau</td><td>Tauri</td><td>Même frontend, installeur léger pour Windows, macOS et Linux.</td></tr>
+<tr><td>Mobile</td><td>Capacitor (même frontend, Android et iOS)</td><td>Évite un second code (React Native) ; les écrans restent identiques.</td></tr>
+<tr><td>Backend</td><td>Node.js + NestJS + Prisma</td><td>API REST typée, modules séparés, validation (zod/class-validator), migrations.</td></tr>
+<tr><td>Base</td><td>PostgreSQL 16</td><td>Transactions, contraintes, verrous de ligne pour le matricule.</td></tr>
+<tr><td>Authentification</td><td>JWT court + refresh token en base, mots de passe Argon2id</td><td>Sessions multi-appareils révocables, déconnexion sur inactivité.</td></tr>
+<tr><td>PDF</td><td>Puppeteer (HTML vers PDF) côté serveur</td><td>Cartes, bulletins et reçus avec le même rendu partout.</td></tr>
+<tr><td>Hors ligne</td><td>File d’actions locale (IndexedDB) + clés d’idempotence</td><td>Pas de doublon à la resynchronisation.</td></tr>
+<tr><td>Fichiers</td><td>Stockage privé (disque ou S3 compatible), URL signées</td><td>Photos et justificatifs jamais publics.</td></tr>
+<tr><td>Hébergement</td><td>Docker Compose : API, PostgreSQL, sauvegarde nocturne (pg_dump chiffré)</td><td>Installation simple sur un VPS ou un serveur local de l’école.</td></tr>
+</table></div>
+<div class="note">Les choix sont volontairement limités : un langage (TypeScript) du serveur à l’écran, une base, un frontend.</div>
 
-<section id="db">
-<h2>3. Base de données MySQL</h2>
-<h3>Schéma relationnel</h3>
-<table>
-<tr><th>Table</th><th>Contenu</th><th>Relations</th></tr>
-<tr><td>roles, permissions, role_permissions</td><td>Rôles et droits configurables</td><td>role_permissions → roles, permissions</td></tr>
-<tr><td>users</td><td>Comptes de connexion</td><td>→ roles ; → membres (optionnel)</td></tr>
-<tr><td>membres</td><td>Fiche individuelle complète</td><td>→ departements (via membre_departement)</td></tr>
-<tr><td>departements</td><td>Nom, description, statut</td><td>responsable_id → membres</td></tr>
-<tr><td>membre_departement</td><td>Appartenance + fonction</td><td>→ membres, departements</td></tr>
-<tr><td>visiteurs</td><td>Visites et suivi</td><td>suivi_par → users ; converti_membre_id → membres</td></tr>
-<tr><td>categories_finance</td><td>Dîmes, offrandes, loyer…</td><td>type : revenu ou depense</td></tr>
-<tr><td>operations</td><td>Entrées et sorties d’argent</td><td>→ categories_finance, users, clotures</td></tr>
-<tr><td>clotures</td><td>Clôtures journalière, mensuelle, annuelle</td><td>→ users</td></tr>
-<tr><td>evenements</td><td>Cultes, réunions, baptêmes…</td><td>responsable_id → membres</td></tr>
-<tr><td>presences</td><td>Présence d’un membre ou d’un visiteur</td><td>→ evenements, membres ou visiteurs</td></tr>
-<tr><td>journal_audit</td><td>Traçabilité des opérations</td><td>→ users</td></tr>
-<tr><td>sync_queue</td><td>Lignes à envoyer vers Google Sheets</td><td>table_name + record_id</td></tr>
-</table>
-<h3>Script SQL de création (Phase 1)</h3>
-<pre><code>CREATE DATABASE churchmanager CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE churchmanager;
+<h2 id="bdd">3. Structure de la base de données</h2>
+<div class="tw"><table>
+<tr><th>Table</th><th>Clés et contraintes principales</th></tr>
+<tr><td>utilisateurs, roles, permissions, roles_permissions</td><td>email UNIQUE ; utilisateurs.role_id → roles ; table de liaison à clé composite</td></tr>
+<tr><td>annees_academiques</td><td>une seule année « active » (index unique partiel)</td></tr>
+<tr><td>niveaux, classes, matieres, classes_matieres</td><td>classes.niveau_id, classes.annee_id ; coefficient et enseignant par ligne de liaison ; capacité ≥ 0</td></tr>
+<tr><td>eleves</td><td><b>matricule UNIQUE NOT NULL</b>, non modifiable ; statut (actif, transféré, archivé, inactif) ; aucune suppression physique</td></tr>
+<tr><td>parents, eleves_parents</td><td>lien N-N avec type de relation ; base du portail parent</td></tr>
+<tr><td>enseignants, employes</td><td>lien optionnel vers utilisateurs ; affectations dans classes_matieres</td></tr>
+<tr><td>inscriptions</td><td>UNIQUE (eleve_id, annee_id) ; classe_id ; date ; statut ; l’historique scolaire = l’ensemble des lignes d’un élève</td></tr>
+<tr><td>examens, evaluations, notes</td><td>notes UNIQUE (evaluation_id, eleve_id) ; valeur entre 0 et le barème</td></tr>
+<tr><td>presences</td><td>UNIQUE (eleve_id, date, creneau) ; statut (présent, absent, retard) ; motif</td></tr>
+<tr><td>emplois_du_temps, salles</td><td>contrainte d’exclusion (enseignant, salle, classe) sur les plages horaires : les conflits sont refusés par la base</td></tr>
+<tr><td>frais, factures, lignes_facture</td><td>frais par niveau et année ; facture liée à une inscription</td></tr>
+<tr><td>paiements, recus</td><td>reference UNIQUE ; devise (USD/HTG), montant, taux_applique ; reçu 1-1 avec le paiement ; paiements non modifiables (annulation = écriture inverse)</td></tr>
+<tr><td>taux_change</td><td>devise, taux, date_effet ; historique conservé</td></tr>
+<tr><td>notifications, annonces</td><td>destinataire (utilisateur ou rôle), lu/non lu, canal (interne ; e-mail, SMS, WhatsApp plus tard)</td></tr>
+<tr><td>documents</td><td>chemin privé, type, hash ; lié à un élève ou à un employé</td></tr>
+<tr><td>journal_activite</td><td>utilisateur, action, entité, avant/après (JSON), IP, date ; écriture seule</td></tr>
+<tr><td>matricule_sequences</td><td>annee PRIMARY KEY, dernier INT (voir ci-dessous)</td></tr>
+<tr><td>export_queue</td><td>file d’envoi vers Google Sheets (voir section 7)</td></tr>
+</table></div>
 
-CREATE TABLE roles(
-  id TINYINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  code VARCHAR(30) NOT NULL UNIQUE, libelle VARCHAR(60) NOT NULL
-) ENGINE=InnoDB;
-CREATE TABLE permissions(
-  id SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  code VARCHAR(60) NOT NULL UNIQUE, libelle VARCHAR(120) NOT NULL
-) ENGINE=InnoDB;
-CREATE TABLE role_permissions(
-  role_id TINYINT UNSIGNED NOT NULL, permission_id SMALLINT UNSIGNED NOT NULL,
-  PRIMARY KEY(role_id,permission_id),
-  FOREIGN KEY(role_id) REFERENCES roles(id) ON DELETE CASCADE,
-  FOREIGN KEY(permission_id) REFERENCES permissions(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+<h2 id="matricule">4. Matricule : génération sans doublon</h2>
+<p>Le numéro est pris dans la base, au moment de la validation, dans la même transaction que la création de l’élève. Le <code>UPDATE</code> verrouille la ligne de l’année : deux secrétaires simultanées sont servies l’une après l’autre. Si la transaction échoue, le compteur revient en arrière, donc pas de trou non plus.</p>
+<pre><code>CREATE TABLE matricule_sequences (annee INT PRIMARY KEY, dernier INT NOT NULL DEFAULT 0);
+ALTER TABLE eleves ADD CONSTRAINT eleves_matricule_uk UNIQUE (matricule);
 
-CREATE TABLE membres(
-  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  matricule VARCHAR(20) NOT NULL UNIQUE,
-  photo VARCHAR(255) NULL,
-  nom VARCHAR(80) NOT NULL, prenom VARCHAR(80) NOT NULL,
-  sexe ENUM('M','F') NOT NULL, date_naissance DATE NULL,
-  telephone VARCHAR(30) NULL, email VARCHAR(120) NULL, adresse VARCHAR(255) NULL,
-  date_integration DATE NULL, date_bapteme DATE NULL,
-  statut ENUM('actif','inactif','transfere','decede','archive') NOT NULL DEFAULT 'actif',
-  urgence_nom VARCHAR(120) NULL, urgence_telephone VARCHAR(30) NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX(nom,prenom), INDEX(statut), INDEX(telephone)
-) ENGINE=InnoDB;
+-- dans la transaction de validation d'inscription
+INSERT INTO matricule_sequences (annee, dernier) VALUES (2026, 1)
+ON CONFLICT (annee) DO UPDATE SET dernier = matricule_sequences.dernier + 1
+RETURNING 'SGSM-' || annee || '-' || lpad(dernier::text, 4, '0') AS matricule;</code></pre>
+<p>Le matricule est ensuite protégé en écriture par un déclencheur (<code>BEFORE UPDATE</code> qui refuse toute modification). Une réinscription ou un changement de classe crée une ligne dans <code>inscriptions</code> et ne touche jamais le matricule.</p>
 
-CREATE TABLE users(
-  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  username VARCHAR(50) NOT NULL UNIQUE,
-  password_hash VARCHAR(255) NOT NULL,
-  role_id TINYINT UNSIGNED NOT NULL,
-  membre_id INT UNSIGNED NULL,
-  actif BOOLEAN NOT NULL DEFAULT TRUE,
-  tentatives TINYINT UNSIGNED NOT NULL DEFAULT 0, verrouille_jusqua DATETIME NULL,
-  derniere_connexion DATETIME NULL,
-  FOREIGN KEY(role_id) REFERENCES roles(id),
-  FOREIGN KEY(membre_id) REFERENCES membres(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
+<h2 id="roles">5. Rôles et permissions</h2>
+<div class="tw"><table>
+<tr><th>Rôle</th><th>Accès</th></tr>
+<tr><td>Administrateur</td><td>Tout, y compris utilisateurs, configuration, journaux</td></tr>
+<tr><td>Directeur</td><td>Lecture des statistiques et rapports ; validation des opérations sensibles (annulation de paiement, archivage)</td></tr>
+<tr><td>Secrétaire</td><td>Inscriptions, dossiers, réinscriptions, documents administratifs</td></tr>
+<tr><td>Comptable</td><td>Frais, paiements, factures, reçus, rapports financiers</td></tr>
+<tr><td>Enseignant</td><td>Uniquement ses classes : notes, présences, emploi du temps</td></tr>
+<tr><td>Parent</td><td>Uniquement ses enfants liés (contrôle fait côté serveur à chaque requête)</td></tr>
+<tr><td>Élève</td><td>Ses notes, bulletins, emploi du temps</td></tr>
+</table></div>
 
-CREATE TABLE departements(
-  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  nom VARCHAR(100) NOT NULL UNIQUE, description TEXT NULL,
-  responsable_id INT UNSIGNED NULL, date_creation DATE NULL,
-  statut ENUM('actif','inactif') NOT NULL DEFAULT 'actif',
-  FOREIGN KEY(responsable_id) REFERENCES membres(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
-CREATE TABLE membre_departement(
-  membre_id INT UNSIGNED NOT NULL, departement_id INT UNSIGNED NOT NULL,
-  fonction VARCHAR(80) NULL, date_adhesion DATE NULL,
-  PRIMARY KEY(membre_id,departement_id),
-  FOREIGN KEY(membre_id) REFERENCES membres(id) ON DELETE CASCADE,
-  FOREIGN KEY(departement_id) REFERENCES departements(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
-CREATE TABLE visiteurs(
-  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  nom VARCHAR(80) NOT NULL, prenom VARCHAR(80) NOT NULL,
-  telephone VARCHAR(30) NULL, adresse VARCHAR(255) NULL,
-  date_visite DATE NOT NULL, nombre_visites SMALLINT UNSIGNED NOT NULL DEFAULT 1,
-  observations TEXT NULL, suivi_par INT UNSIGNED NULL,
-  souhaite_devenir_membre BOOLEAN NOT NULL DEFAULT FALSE,
-  converti_membre_id INT UNSIGNED NULL,
-  FOREIGN KEY(suivi_par) REFERENCES users(id) ON DELETE SET NULL,
-  FOREIGN KEY(converti_membre_id) REFERENCES membres(id) ON DELETE SET NULL,
-  INDEX(date_visite), INDEX(nom,prenom)
-) ENGINE=InnoDB;
-
-CREATE TABLE categories_finance(
-  id SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  nom VARCHAR(80) NOT NULL, type ENUM('revenu','depense') NOT NULL,
-  UNIQUE(nom,type)
-) ENGINE=InnoDB;
-CREATE TABLE clotures(
-  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  periode ENUM('jour','mois','annee') NOT NULL,
-  date_debut DATE NOT NULL, date_fin DATE NOT NULL,
-  total_revenus DECIMAL(14,2) NOT NULL, total_depenses DECIMAL(14,2) NOT NULL,
-  cloture_par INT UNSIGNED NOT NULL, cloture_le DATETIME NOT NULL,
-  UNIQUE(periode,date_debut),
-  FOREIGN KEY(cloture_par) REFERENCES users(id)
-) ENGINE=InnoDB;
-CREATE TABLE operations(
-  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  reference VARCHAR(25) NOT NULL UNIQUE,
-  date_operation DATE NOT NULL, categorie_id SMALLINT UNSIGNED NOT NULL,
-  description VARCHAR(255) NULL,
-  montant DECIMAL(14,2) NOT NULL CHECK (montant &gt; 0),
-  mode_paiement ENUM('especes','cheque','virement','mobile') NOT NULL,
-  saisi_par INT UNSIGNED NOT NULL, cloture_id INT UNSIGNED NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY(categorie_id) REFERENCES categories_finance(id),
-  FOREIGN KEY(saisi_par) REFERENCES users(id),
-  FOREIGN KEY(cloture_id) REFERENCES clotures(id),
-  INDEX(date_operation), INDEX(categorie_id)
-) ENGINE=InnoDB;
-
-CREATE TABLE evenements(
-  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  titre VARCHAR(150) NOT NULL,
-  type ENUM('culte','priere','conference','seminaire','retraite','bapteme','mariage','autre') NOT NULL,
-  description TEXT NULL, date_evenement DATE NOT NULL, heure TIME NULL,
-  lieu VARCHAR(150) NULL, responsable_id INT UNSIGNED NULL,
-  statut ENUM('planifie','en_cours','termine','annule') NOT NULL DEFAULT 'planifie',
-  FOREIGN KEY(responsable_id) REFERENCES membres(id) ON DELETE SET NULL,
-  INDEX(date_evenement)
-) ENGINE=InnoDB;
-CREATE TABLE presences(
-  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  evenement_id INT UNSIGNED NOT NULL,
-  membre_id INT UNSIGNED NULL, visiteur_id INT UNSIGNED NULL,
-  present BOOLEAN NOT NULL DEFAULT TRUE,
-  FOREIGN KEY(evenement_id) REFERENCES evenements(id) ON DELETE CASCADE,
-  FOREIGN KEY(membre_id) REFERENCES membres(id) ON DELETE CASCADE,
-  FOREIGN KEY(visiteur_id) REFERENCES visiteurs(id) ON DELETE CASCADE,
-  UNIQUE(evenement_id,membre_id), UNIQUE(evenement_id,visiteur_id),
-  CHECK ((membre_id IS NULL) &lt;&gt; (visiteur_id IS NULL))
-) ENGINE=InnoDB;
-
-CREATE TABLE journal_audit(
-  id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  user_id INT UNSIGNED NULL, action VARCHAR(40) NOT NULL,
-  table_name VARCHAR(40) NULL, record_id INT UNSIGNED NULL,
-  details JSON NULL, ip VARCHAR(45) NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL,
-  INDEX(created_at), INDEX(table_name,record_id)
-) ENGINE=InnoDB;
-CREATE TABLE sync_queue(
-  id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  table_name VARCHAR(40) NOT NULL, record_id INT UNSIGNED NOT NULL,
-  action ENUM('upsert','delete') NOT NULL DEFAULT 'upsert',
-  statut ENUM('attente','envoye','erreur') NOT NULL DEFAULT 'attente',
-  tentatives TINYINT UNSIGNED NOT NULL DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX(statut)
-) ENGINE=InnoDB;</code></pre>
-<p>Une opération appartenant à une clôture est verrouillée : le backend refuse sa modification.</p>
-</section>
-
-<section id="auth">
-<h2>4. Authentification et permissions</h2>
-<table>
-<tr><th>Mesure</th><th>Mise en œuvre</th></tr>
-<tr><td>Mots de passe</td><td><code>password_hash()</code> (Argon2id ou bcrypt), <code>password_verify()</code>, minimum 10 caractères.</td></tr>
-<tr><td>Session</td><td>Cookies <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite=Strict</code> ; <code>session_regenerate_id()</code> à la connexion ; expiration après 30 min d’inactivité.</td></tr>
-<tr><td>Force brute</td><td>Verrouillage 15 min après 5 échecs (<code>tentatives</code>, <code>verrouille_jusqua</code>).</td></tr>
-<tr><td>CSRF</td><td>Jeton unique par session dans chaque formulaire et en-tête <code>X-CSRF-Token</code> des appels <code>fetch()</code>.</td></tr>
-<tr><td>XSS</td><td>Échappement <code>htmlspecialchars()</code> en sortie, <code>textContent</code> côté JavaScript, en-tête CSP.</td></tr>
-<tr><td>SQL</td><td>PDO, requêtes préparées uniquement, <code>ATTR_EMULATE_PREPARES=false</code>.</td></tr>
-<tr><td>Permissions</td><td>Chaque route déclare un code (<code>finances.creer</code>, <code>membres.modifier</code>…). Les droits sont stockés en base et modifiables par le super administrateur.</td></tr>
-<tr><td>Traçabilité</td><td>Connexions, créations, modifications, suppressions et clôtures écrites dans <code>journal_audit</code>.</td></tr>
-</table>
-<h3>Matrice initiale des rôles</h3>
-<table>
-<tr><th>Module</th><th>Super admin</th><th>Pasteur</th><th>Secrétaire</th><th>Trésorier</th><th>Resp. département</th></tr>
-<tr><td>Tableau de bord</td><td>Complet</td><td>Complet</td><td>Sans finances</td><td>Finances</td><td>Son département</td></tr>
-<tr><td>Membres</td><td>CRUD</td><td>Lecture</td><td>CRUD</td><td>–</td><td>Son département</td></tr>
-<tr><td>Visiteurs</td><td>CRUD</td><td>Lecture</td><td>CRUD</td><td>–</td><td>–</td></tr>
-<tr><td>Départements</td><td>CRUD</td><td>Lecture</td><td>Lecture</td><td>–</td><td>Le sien</td></tr>
-<tr><td>Finances</td><td>CRUD + clôture</td><td>Lecture</td><td>–</td><td>CRUD + clôture</td><td>–</td></tr>
-<tr><td>Événements, présences</td><td>CRUD</td><td>Lecture</td><td>CRUD</td><td>–</td><td>Les siens</td></tr>
-<tr><td>Utilisateurs, sauvegardes</td><td>CRUD</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
-<tr><td>Rapports</td><td>Tous</td><td>Tous</td><td>Non financiers</td><td>Financiers</td><td>Son département</td></tr>
-</table>
-</section>
-
-<section id="design">
-<h2>5. Conception visuelle</h2>
-<div class="sw">
-<div style="background:#0B2545;color:#fff">Bleu marine<br>#0B2545</div>
-<div style="background:#13315C;color:#fff">Bleu profond<br>#13315C</div>
-<div style="background:#B8913A;color:#0B2545">Doré<br>#B8913A</div>
-<div style="background:#FBFAF6">Blanc cassé<br>#FBFAF6</div>
-<div style="background:#fff">Blanc<br>#FFFFFF</div>
-</div>
-<p>Titres en serif (Georgia), interface en sans-serif système (Segoe UI, Roboto). Le doré est réservé aux éléments actifs : filet de la topbar, élément de menu courant, bouton principal, valeurs clés. Cartes statistiques aux coins arrondis, tableaux à en-tête bleu marine, notifications vertes (succès) et rouges (erreur), fenêtres de confirmation pour toute suppression.</p>
-<h3>Structure des écrans</h3>
-<div class="wire" role="img" aria-label="Schéma de l'écran principal">
-<div class="sb">Tableau de bord<br>Membres<br>Visiteurs<br>Départements<br>Finances<br>Événements<br>Présences<br>Rapports<br>Utilisateurs</div>
-<div class="mn">
-<div class="tb">Recherche · Notifications · Profil</div>
-<div class="cards"><span>Membres</span><span>Offrandes</span><span>Dépenses</span><span>Solde</span></div>
-<div class="gr">Graphiques : membres, revenus et dépenses · Prochains événements</div>
-</div>
-</div>
-<p>Sur mobile, la sidebar devient un menu escamotable, les tableaux défilent horizontalement et les cartes passent sur deux colonnes puis une.</p>
-</section>
-
-<section id="sheets">
-<h2>6. Remontée des données vers Google Sheets</h2>
-<p>Principe : à chaque création, modification ou suppression, le backend ajoute une ligne dans <code>sync_queue</code>. Une tâche planifiée (cron) envoie ces lignes à un script Google Apps Script, qui les écrit dans le classeur : un onglet par table. MySQL reste la source de vérité ; Google Sheets sert de copie de consultation.</p>
-<h3>Étape 1 : préparer le classeur</h3>
+<h2 id="plan">6. Plan de développement</h2>
 <ol>
-<li>Créez un Google Sheets nommé « ChurchManager – Données ».</li>
-<li>Menu <strong>Extensions → Apps Script</strong>.</li>
-<li>Supprimez le code existant et collez le script ci-dessous (fichier <code>sheets/apps_script.gs</code>).</li>
-<li>Remplacez <code>CHANGER_CE_SECRET</code> par une longue chaîne aléatoire (32 caractères ou plus).</li>
+<li><b>Fondations</b> : dépôt Git, Docker Compose, migrations, authentification, rôles, journal d’activité.</li>
+<li><b>Cœur élèves</b> : années, niveaux, classes, inscriptions, matricule, fiche PDF, carte scolaire, tests de concurrence du matricule.</li>
+<li><b>Pédagogie</b> : matières, notes, moyennes pondérées, classement, bulletins PDF.</li>
+<li><b>Finance</b> : frais, paiements partiels, USD/HTG, reçus, factures, soldes.</li>
+<li><b>Vie scolaire</b> : présences, emploi du temps avec détection de conflits, notifications.</li>
+<li><b>Portails et rapports</b> : parents, élèves, tableau de bord, statistiques, exports.</li>
+<li><b>Multiplateforme</b> : Tauri, Capacitor, mode hors ligne limité, synchronisation.</li>
+<li><b>Tests et sécurité</b> : tests unitaires et d’intégration, revue des permissions, sauvegarde et restauration, documentation.</li>
 </ol>
-<pre><code>const SECRET = 'CHANGER_CE_SECRET';
+<p>Chaque étape est livrée avec ses tests, et je ne passe à la suivante qu’une fois la précédente vérifiée.</p>
 
-function doPost(e) {
-  const d = JSON.parse(e.postData.contents);
-  if (d.token !== SECRET) return out({ok:false, error:'refuse'});
-  const ss = SpreadsheetApp.getActive();
-  const sh = ss.getSheetByName(d.table) || ss.insertSheet(d.table);
-  if (sh.getLastRow() === 0 &amp;&amp; d.row) sh.appendRow(Object.keys(d.row));
-  const n = sh.getLastRow() - 1;
-  const ids = n &gt; 0 ? sh.getRange(2, 1, n, 1).getValues().flat().map(String) : [];
-  const i = ids.indexOf(String(d.id));
-  if (d.action === 'delete') {
-    if (i &gt;= 0) sh.deleteRow(i + 2);
-  } else {
-    const vals = Object.values(d.row);
-    if (i &gt;= 0) sh.getRange(i + 2, 1, 1, vals.length).setValues([vals]);
-    else sh.appendRow(vals);
+<h2 id="sheets">7. Remontée des données vers Google Sheets</h2>
+<p>Principe : <b>la base PostgreSQL reste la source de vérité</b>. Google Sheets est un miroir en lecture, alimenté à sens unique. Chaque changement important (inscription, paiement, note, absence) est inscrit dans une file <code>export_queue</code> dans la même transaction, puis un worker l’envoie à Google. Si internet tombe, rien n’est perdu : l’envoi reprend plus tard.</p>
+
+<h3>Étape 1 — Créer le fichier Google Sheets</h3>
+<ol>
+<li>Dans Google Drive : <b>Nouveau → Google Sheets</b>, nommez-le <code>SGSM_Export</code>.</li>
+<li>Créez les onglets <code>Eleves</code>, <code>Paiements</code>, <code>Notes</code>, <code>Presences</code>.</li>
+<li>Ligne 1 de chaque onglet, colonne A toujours = clé unique :
+<ul>
+<li>Eleves : <code>matricule | nom | prenom | sexe | classe | annee | statut | maj</code></li>
+<li>Paiements : <code>reference | matricule | montant | devise | taux | montant_usd | date | maj</code></li>
+<li>Notes : <code>cle | matricule | matiere | evaluation | note | bareme | date | maj</code></li>
+<li>Presences : <code>cle | matricule | date | statut | motif | maj</code></li>
+</ul></li>
+<li>Ne partagez ce fichier qu’avec la direction : il contient des données d’élèves.</li>
+</ol>
+
+<h3>Étape 2 — Installer le récepteur (Google Apps Script)</h3>
+<ol>
+<li>Dans le fichier : <b>Extensions → Apps Script</b>. Supprimez le contenu et collez :</li>
+</ol>
+<pre><code>function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const p = JSON.parse(e.postData.contents);
+    const secret = PropertiesService.getScriptProperties().getProperty('SGSM_TOKEN');
+    if (p.token !== secret) return rep({ ok: false, erreur: 'non autorise' });
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sh = ss.getSheetByName(p.feuille);
+    if (!sh) return rep({ ok: false, erreur: 'feuille inconnue: ' + p.feuille });
+
+    const entetes = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+    const n = sh.getLastRow();
+    const cles = n > 1 ? sh.getRange(2, 1, n - 1, 1).getValues().flat().map(String) : [];
+
+    p.lignes.forEach(function (obj) {
+      const ligne = entetes.map(function (h) { return obj[h] === undefined ? '' : obj[h]; });
+      const i = cles.indexOf(String(ligne[0]));
+      if (i === -1) {                      // nouvelle clé : on ajoute
+        sh.appendRow(ligne);
+        cles.push(String(ligne[0]));
+      } else {                             // clé connue : on met à jour (pas de doublon)
+        sh.getRange(i + 2, 1, 1, ligne.length).setValues([ligne]);
+      }
+    });
+    return rep({ ok: true, recu: p.lignes.length });
+  } finally {
+    lock.releaseLock();
   }
-  return out({ok:true});
 }
-function out(o) {
-  return ContentService.createTextOutput(JSON.stringify(o))
-    .setMimeType(ContentService.MimeType.JSON);
+function rep(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }</code></pre>
-<h3>Étape 2 : publier le script</h3>
-<ol start="5">
-<li><strong>Déployer → Nouveau déploiement → Application Web</strong>.</li>
-<li>Exécuter en tant que : <strong>Moi</strong>. Qui a accès : <strong>Tout le monde</strong> (l’accès est protégé par le secret).</li>
-<li>Autorisez les permissions demandées, puis copiez l’<strong>URL</strong> terminant par <code>/exec</code>.</li>
+<ol start="2">
+<li>Engrenage <b>Paramètres du projet → Propriétés du script → Ajouter</b> : nom <code>SGSM_TOKEN</code>, valeur = une longue chaîne aléatoire (générez-la avec <code>openssl rand -hex 32</code>). Gardez-la, elle ira dans le <code>.env</code> du serveur.</li>
+<li><b>Déployer → Nouveau déploiement → type « Application Web »</b>. Exécuter en tant que : <b>Moi</b>. Qui a accès : <b>Tout le monde</b> (le jeton secret protège l’accès). Autorisez les droits demandés.</li>
+<li>Copiez l’<b>URL de l’application Web</b> (elle se termine par <code>/exec</code>).</li>
 </ol>
-<h3>Étape 3 : configurer l’application</h3>
-<ol start="8">
-<li>Dans <code>app/config/config.php</code>, renseignez <code>SHEETS_URL</code> (URL copiée) et <code>SHEETS_SECRET</code> (même secret). Ces valeurs ne doivent jamais apparaître dans le JavaScript du navigateur.</li>
-<li>La classe <code>core/SheetsSync.php</code> lit les lignes <code>statut='attente'</code>, charge l’enregistrement, puis envoie en cURL : <code>{"token":…,"table":"membres","id":12,"action":"upsert","row":{…}}</code>. En cas de succès, la ligne passe à <code>envoye</code> ; sinon <code>erreur</code> avec nouvelle tentative (3 maximum).</li>
-<li>Planifiez la tâche toutes les 5 minutes : <code>*/5 * * * * php /chemin/churchmanager/cron/sync_sheets.php</code> (cron de l’hébergeur).</li>
-</ol>
-<h3>Étape 4 : vérifier</h3>
-<ol start="11">
-<li>Ajoutez un membre test dans l’application.</li>
-<li>Lancez <code>sync_sheets.php</code> à la main, puis ouvrez le classeur : l’onglet <code>membres</code> doit contenir l’en-tête et la ligne.</li>
-<li>Modifiez le membre : la même ligne est mise à jour, sans doublon.</li>
-</ol>
-<div class="note"><strong>Confidentialité.</strong> Les fiches de membres sont des données personnelles. Gardez le classeur privé, partagez-le uniquement avec les personnes autorisées, et n’envoyez pas les colonnes sensibles inutiles (photo, contact d’urgence). Les opérations financières restent visibles seulement du trésorier et du pasteur.</div>
-</section>
 
-<section id="valid">
-<h2>7. Validation demandée</h2>
-<p>Points à confirmer avant la Phase 2 :</p>
+<h3>Étape 3 — Variables d’environnement du serveur</h3>
+<pre><code>GSHEETS_URL=https://script.google.com/macros/s/XXXXXXXX/exec
+GSHEETS_TOKEN=la_valeur_de_SGSM_TOKEN
+GSHEETS_BATCH=200
+GSHEETS_INTERVAL_SEC=60</code></pre>
+<p>Ces valeurs ne vont jamais dans le dépôt Git ni dans le frontend.</p>
+
+<h3>Étape 4 — File d’envoi dans PostgreSQL</h3>
+<pre><code>CREATE TABLE export_queue (
+  id          BIGSERIAL PRIMARY KEY,
+  feuille     TEXT NOT NULL,          -- Eleves, Paiements, Notes, Presences
+  cle         TEXT NOT NULL,          -- matricule, reference de paiement, ...
+  payload     JSONB NOT NULL,         -- la ligne à écrire
+  statut      TEXT NOT NULL DEFAULT 'attente',  -- attente | envoye | erreur
+  tentatives  INT  NOT NULL DEFAULT 0,
+  erreur      TEXT,
+  cree_le     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX ON export_queue (statut, id);</code></pre>
+<p>Le service métier ajoute la ligne dans la même transaction que l’opération (inscription validée, paiement enregistré, etc.) : si l’opération est annulée, l’export l’est aussi.</p>
+
+<h3>Étape 5 — Worker d’envoi (Node.js, toutes les 60 s)</h3>
+<pre><code>// export-sheets.worker.ts
+export async function envoyerVersSheets(db) {
+  const { rows } = await db.query(
+    `SELECT id, feuille, payload FROM export_queue
+     WHERE statut = 'attente' ORDER BY id
+     LIMIT $1 FOR UPDATE SKIP LOCKED`, [Number(process.env.GSHEETS_BATCH)]);
+  if (!rows.length) return;
+
+  const parFeuille = {};
+  rows.forEach(r => (parFeuille[r.feuille] ??= []).push(r));
+
+  for (const [feuille, items] of Object.entries(parFeuille)) {
+    const ids = items.map(i => i.id);
+    try {
+      const res = await fetch(process.env.GSHEETS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          token: process.env.GSHEETS_TOKEN,
+          feuille,
+          lignes: items.map(i => i.payload),
+        }),
+      });
+      const r = await res.json();
+      if (!r.ok) throw new Error(r.erreur);
+      await db.query(`UPDATE export_queue SET statut='envoye' WHERE id = ANY($1)`, [ids]);
+    } catch (e) {
+      await db.query(
+        `UPDATE export_queue SET tentatives = tentatives + 1, erreur = $2,
+         statut = CASE WHEN tentatives >= 9 THEN 'erreur' ELSE 'attente' END
+         WHERE id = ANY($1)`, [ids, String(e.message)]);
+    }
+  }
+}
+// planifié avec @nestjs/schedule : @Interval(60000)</code></pre>
+<p>Points importants : <code>SKIP LOCKED</code> évite que deux instances envoient les mêmes lignes ; <code>text/plain</code> évite un blocage de type CORS ; la clé en colonne A rend l’envoi <b>idempotent</b> (renvoyer deux fois met à jour la ligne au lieu de la dupliquer).</p>
+
+<h3>Étape 6 — Ce qui est envoyé (et ce qui ne l’est pas)</h3>
+<ul>
+<li>Envoyé : matricule, nom, prénom, classe, statut, paiements, notes, présences.</li>
+<li>Jamais envoyé : informations médicales, téléphones des parents, documents, photos, mots de passe.</li>
+<li>Pour une première reprise (élèves déjà présents), un bouton administrateur « Exporter tout » remplit la file avec toutes les lignes existantes.</li>
+</ul>
+
+<h3>Étape 7 — Tester</h3>
 <ol>
-<li>Accord sur l’ajout de PHP 8 comme couche serveur (obligatoire pour MySQL).</li>
-<li>Devise utilisée (gourde haïtienne, dollar américain ou les deux).</li>
-<li>Hébergement prévu (local avec XAMPP ou serveur en ligne), car cela fixe la méthode de planification du cron.</li>
-<li>Colonnes à envoyer vers Google Sheets (toutes les tables ou seulement membres, visiteurs et finances).</li>
+<li>Inscrivez un élève de test : en moins d’une minute, une ligne <code>SGSM-2026-0001</code> apparaît dans <code>Eleves</code>.</li>
+<li>Modifiez sa classe : la même ligne est mise à jour, sans nouvelle ligne.</li>
+<li>Coupez internet côté serveur, enregistrez un paiement, rétablissez : le paiement arrive dans la feuille.</li>
+<li>Envoyez une requête avec un mauvais jeton : réponse « non autorisé », rien n’est écrit.</li>
 </ol>
-<p>Dès votre validation, je développe la Phase 2 en commençant par le socle commun (configuration, connexion, mise en page) puis le tableau de bord.</p>
-</section>
+<div class="note"><b>Limites à connaître.</b> Apps Script plafonne le volume d’appels par jour et reste lent au-delà de quelques dizaines de milliers de lignes par feuille. Pour une école, c’est largement suffisant ; au-delà, on passera à l’API Google Sheets avec un compte de service (même file, seul le worker change). Google Sheets sert à consulter et analyser : ne modifiez pas les données dans la feuille, elles seraient écrasées au prochain envoi.</div>
 
+<h2 id="questions">8. Questions avant validation</h2>
+<ol>
+<li>Le serveur sera-t-il hébergé en ligne (VPS) ou dans l’école, sur un ordinateur local ?</li>
+<li>Combien d’élèves environ, et combien de secrétaires saisiront en même temps ?</li>
+<li>Le barème des notes (sur 10, 20, 100) et les périodes (trimestres, étapes) sont-ils les mêmes pour tous les niveaux ?</li>
+<li>Faut-il les deux devises sur chaque reçu, ou la devise payée seulement ?</li>
+<li>L’école a-t-elle déjà des données (Excel) à importer ?</li>
+</ol>
+<p>Dès votre validation, je passe à l’étape 1 du plan : fondations, base PostgreSQL et authentification.</p>
 </main>
-<footer>ChurchManager · Phase 1 · en attente de validation</footer>
 </body>
 </html>
